@@ -275,16 +275,16 @@ class MyCoolAgent extends Agent {
     if (!this.openConvs[c.dialogId]) {
       return;
     }
-    /* console.log("--------------------------------");
-    console.log(c.event.type);
-    console.log("--------------------------------") */ // get conversation state
+    console.log("--------------------------------");
+    console.log(c.event);
+    console.log("--------------------------------"); // get conversation state
     let conversation = this.openConvs[c.dialogId];
 
     // check for duplicate message by sequence
-    if (conversation.messages.hasOwnProperty(c.sequence)) {
+    /* if (conversation.messages.hasOwnProperty(c.sequence)) {
       console.log(`ignoring duplicate message ${c.sequence}`);
       return;
-    }
+    } */
 
     // store this message
     conversation.messages[c.sequence] = c.event;
@@ -294,7 +294,7 @@ class MyCoolAgent extends Agent {
     if (c.event.type === "ContentEvent" && c.originatorId !== this.agentId) {
       // emit the message to any listeners
       let contentEvent;
-      /* if (c.event.message === "1") {
+      if (c.event.message === "1") {
         contentEvent = {
           dialogId: c.dialogId,
           sequence: c.sequence,
@@ -315,13 +315,21 @@ class MyCoolAgent extends Agent {
           message: "unknown",
           metadata: c.metadata || [],
         };
-      } */
-      contentEvent = {
+      }
+      /* contentEvent = {
         dialogId: c.dialogId,
         sequence: c.sequence,
         message: c.event.message,
         metadata: c.metadata || [],
-      };
+      }; */
+      this.publishEvent({
+        dialogId: contentEvent.convId,
+        event: {
+          type: "ContentEvent",
+          contentType: "text/plain",
+          message: contentEvent.message,
+        },
+      });
       this.emit(this.CONTENT_NOTIFICATION, contentEvent);
       this.emit(this.CONTENT_NOTIFICATION_LEGACY, contentEvent);
     }

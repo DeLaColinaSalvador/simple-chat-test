@@ -40,3 +40,33 @@ io.on("connection", (socket) => {
     io.emit("chat message", msg);
   });
 });
+
+echoAgent.on(echoAgent.CONTENT_NOTIFICATION, (contentEvent) => {
+  if (contentEvent.message.startsWith("#close")) {
+    echoAgent.updateConversationField({
+      conversationId: contentEvent.dialogId,
+      conversationField: [
+        {
+          field: "ConversationStateField",
+          conversationState: "CLOSE",
+        },
+      ],
+    });
+  } else if (contentEvent.message.startsWith("#test")) {
+    console.log("closing WS in 5s");
+
+    setTimeout(() => {
+      console.log("closing WS");
+      echoAgent.transport.ws.close();
+    }, 5000);
+  } else {
+    echoAgent.publishEvent({
+      dialogId: contentEvent.dialogId,
+      event: {
+        type: "ContentEvent",
+        contentType: "text/plain",
+        message: `echo : ${contentEvent.message}`,
+      },
+    });
+  }
+});
