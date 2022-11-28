@@ -30,15 +30,32 @@ if (process.env.LP_CSDS) {
 const echoAgent = new MyCoolAgent(conf);
 
 //--------------------------------------------------------------------
+var dialogId;
 
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
-  socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
+  socket.on("outgoing message", ({ msg, dialogId }) => {
+    echoAgent.publishEvent({
+      dialogId: dialogId,
+      event: {
+        type: "ContentEvent",
+        contentType: "text/plain",
+        message: `${msg}`,
+      },
+    });
+    io.emit("incoming message", { msg: msg, dialogId: dialogId });
   });
+  /* echoAgent.on(echoAgent.CONTENT_NOTIFICATION, (contentEvent) => {
+    if (
+      !contentEvent.message.startsWith("#close") &&
+      !contentEvent.message.startsWith("#test")
+    ) {
+      io;
+    }
+  }); */
 });
 
 echoAgent.on(echoAgent.CONTENT_NOTIFICATION, (contentEvent) => {
@@ -60,13 +77,17 @@ echoAgent.on(echoAgent.CONTENT_NOTIFICATION, (contentEvent) => {
       echoAgent.transport.ws.close();
     }, 5000);
   } else {
-    echoAgent.publishEvent({
+    io.emit("incoming message", {
+      msg: contentEvent.message,
+      dialogId: contentEvent.dialogId,
+    });
+    /* echoAgent.publishEvent({
       dialogId: contentEvent.dialogId,
       event: {
         type: "ContentEvent",
         contentType: "text/plain",
         message: `echo : ${contentEvent.message}`,
       },
-    });
+    }); */
   }
 });

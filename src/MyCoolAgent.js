@@ -276,7 +276,7 @@ class MyCoolAgent extends Agent {
       return;
     }
     console.log("--------------------------------");
-    console.log(c.event);
+    console.log(c);
     console.log("--------------------------------"); // get conversation state
     let conversation = this.openConvs[c.dialogId];
 
@@ -294,7 +294,7 @@ class MyCoolAgent extends Agent {
     if (c.event.type === "ContentEvent" && c.originatorId !== this.agentId) {
       // emit the message to any listeners
       let contentEvent;
-      if (c.event.message === "1") {
+      /* if (c.event.message === "1") {
         contentEvent = {
           dialogId: c.dialogId,
           sequence: c.sequence,
@@ -315,21 +315,13 @@ class MyCoolAgent extends Agent {
           message: "unknown",
           metadata: c.metadata || [],
         };
-      }
-      /* contentEvent = {
+      } */
+      contentEvent = {
         dialogId: c.dialogId,
         sequence: c.sequence,
         message: c.event.message,
         metadata: c.metadata || [],
-      }; */
-      this.publishEvent({
-        dialogId: contentEvent.convId,
-        event: {
-          type: "ContentEvent",
-          contentType: "text/plain",
-          message: contentEvent.message,
-        },
-      });
+      };
       this.emit(this.CONTENT_NOTIFICATION, contentEvent);
       this.emit(this.CONTENT_NOTIFICATION_LEGACY, contentEvent);
     }
